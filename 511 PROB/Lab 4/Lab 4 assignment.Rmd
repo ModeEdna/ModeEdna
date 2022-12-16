@@ -1,0 +1,138 @@
+---
+title: "Lab 4 Assignment"
+author: "Eduardo Armenta"
+
+output: rmdformats::robobook
+---
+
+## Problem 1:
+
+Use simulation to answer the following questions.
+
+Given independent uniform random variables $X_1 \sim U(a, b)$ and $X_2 \sim U(a,b)$. (You can use parameters of your choice)
+
+*a.* Is the distribution of $X_1 +X_2$ uniform? Please Justify your answer.
+```{r}
+hist(runif(10000,-10,10)+runif(10000,-10,10))
+```
+The histogram shows that adding the two distributions doesn't give us a uniform distribution. This is expected as there are more combinations to get 0 than there are to get +/-20.
+
+*b.* Is the distribution of $X_1.X_2$ uniform? Please Justify your answer.
+```{r}
+hist(runif(10000,-10,10)*runif(10000,-10,10))
+```
+It's not a uniform distribution; it's actually a normal distribution. This is justified by the histogram. The further out you get, the combination of products to get the values are few (i.e. 100 is 10*10 or -10*-10) while those at the center have more ways of being created (i.e. 0*any number).
+
+*c.* Is the distribution of $max(X_1, X_2)$ or $min(X_1, X_2)$ uniform? Please Justify your answer.
+```{r}
+dis1 <- runif(10000,-10,10)
+dis2 <- runif(10000,-10,10)
+hist(pmax(dis1, dis2, na.rm = TRUE))
+```
+The histogram shows that there will be a tendency of higher values appearing more often. Logically, if we're taking the maximum value of each pair of instances from the distributions, the only way for -10 to appear would be for both to be -10. On the other hand, 10 will always be picked as the highest number.
+
+*d.* Is the distribution of $1-X_1$ uniform? Please Justify your answer.
+```{r}
+hist(1-runif(10000,-10,10))
+```
+The histogram shows that it is. Theoretically, we're just shifting the values by -1. We can see this by the extreme values being -9 and 11; 1-(-10) is 11 and 1-10 is -9.
+
+## Problem 2:
+
+Prove the following theorems using simulation. (You can use parameters of your choice)
+
+a. Linear Transformations
+
+![](t1.png)
+```{r}
+# create variable of 100 random, normal numbers. find mean, variance, and standard deviation
+X = rnorm(100)
+Xmean = mean(X)
+Xvar = var(X)
+Xstd = sqrt(Xvar)
+
+# define a and b. define Y with a, b, and the created distribution
+a = 1
+b = 5
+Y = a*X + b
+
+# proving that mean of Y is the same as a*mean(X)+b
+mean(Y)
+a*Xmean+b
+
+# proving that the variance for Y is the same as a^2*variance
+var(Y)
+a**2*Xvar
+```
+Finding the variance and mean in both ways shows that the aforementioned theorem is correct.
+
+b. Linear Combinations of Normally Distributed Variables
+
+![](t2.png)
+
+```{r}
+s=10000
+iterations=10
+mus <- c(0,1,2,3,4,5,6,7,8,9)
+sds <- c(1,2,3,4,5,6,7,8,9,10)
+df <- data.frame(matrix(data=NA, nrow=s, ncol=iterations))
+for (i in 1:10){
+  df[i] <- rnorm(s, mus[i], sds[i])
+}
+# sum the rows
+x <- rowSums(df)
+# mean of distribution
+mean(x)
+# sum of distribution means
+sum(mus)
+# variance of distribution
+var(x)
+# sum of variances
+sum(sds^2)
+```
+Mean and sum of means is very similar, maybe with more simulations we can get it close to exactly the same. The same goes for variances.
+
+## Problem 3: 
+
+Use the iris data set to check the normality of Sepal width of setosa using the following normality tests (Repeat the steps  in the example 3 in lab 4, comment  on your results)
+
+a. Anderson Darling Test
+```{r}
+df <- read.csv('/Users/modeedna/Desktop/SCHOOLS/GEORGETOWN/511 PROB/Lab 4/iris.csv')
+library(nortest)
+setosa <- df[df$variety=='Setosa',]
+ad.test(setosa$sepal.width)
+```
+Given that the p-value is over 0.05, we can confirm that the distribution is normal.
+
+b. Kolmogorov-Smirnov Test (Compare to a standard normal distribution)
+```{r}
+ks.test(setosa$sepal.width,'pnorm',mean(setosa$sepal.width),sqrt(var(setosa$sepal.width)))
+```
+According to this test, it's normally distributed. I used the mean and standard deviation of the variable and compared it to a normal distribution. The p-value shows that it is indeed normally distributed.
+
+## Problem 4 (BONUS): Exponential Distribution
+
+Given exponentially distributed random variables $X_1, . . . , X_k$ . Think of waiting times for independent random alarm clocks $1,...,k$ to go off.
+
+Which of these are again exponentially distributed? Explore with a simulation.
+(Hint: you can use many methods here to compare the distributions, for example; using Kolmogorov-Smirnov Test, plotting cdfs or ecdfs(as we did in lab 3),..etc )
+
+a. Distribution of $min(X_1,\dots,X_k)$? Waiting time for the first alarm to go off.
+```{r}
+hist(replicate(10000,min(rexp(10000,1))))
+```
+The distribution of the mins remains an exponential distribution, as evidenced by the histogram.
+
+b. Distribution of $max(X_1, \dots, X_k )$? Waiting time for the last alarm to go off.
+```{r}
+hist(replicate(10000,max(rexp(10000,1))))
+```
+The distribution for the maxes gets close to an exponential distribution, but is closer to a normal distribution with a long/heavy right tail, as evidenced by the histogram.
+
+c. Distribution of $X_1 + \dots + X_k$ ? Waiting time until Start of the next clock when the previous alarm/s has gone off.
+```{r}
+hist(replicate(10000,sum(rexp(10000,1))))
+```
+The distribution for the sums is a normal distribution, shown by the historgam.
+

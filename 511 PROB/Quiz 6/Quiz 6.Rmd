@@ -1,0 +1,214 @@
+---
+title: "Quiz 6"
+author: "Eduardo Armenta"
+date: "2022-12-03"
+output: rmdformats::robobook
+---
+
+## INSTRUCTIONS:
+
+Any potential violation of Georgetown’s policy on academic integrity will be reported. All work on this exam must be your own. You are not allowed to communicate or gain information in any way from your classmates or seek outside human help on the exam. If you are using online resources always cite the sources (and/or include the links).
+
+You need to SHOW YOUR WORK in order to get full credits.
+__________________________________________________________________________
+
+
+## Problem: Linear Regression (_105 points_)
+
+In the last Quiz, you compared Kelly Clarkson's music with Arianna Grande's music. We will extend this analysis by fitting linear regression model for the data: "Ariana_grande.csv".
+
+```{r}
+library(dplyr)
+df <- read.csv('Arianna_grande.csv')
+```
+## Data science question
+a. (_5 points_) Formulate your Data Science question?
+
+    _*Data Science Question: What are the variables contributing for predicting  "............." of the songs of musician; Arianna Grande.*_
+
+    You have to choose the response variable of your choice. (Please indicate why you chose this variable as the response variable)
+    
+Data science question: which variables contribute to the predictability of the energy of a song by Ariana Grande?
+
+I chose energy as the response variable because I think it's the most likely to be affected by other variables. I'd expect the energy of a song to be dependent on its danceability, tempo, key, etc. We tend to see higher energy in songs that are dance-oriented, songs with brighter keys, etc., so I wanted to explore the belief that energy could be predicted on these variables.
+
+## Linear regression fit
+b. Fit a linear regression model for Artist: _Ariana Grande_ , to find what variables contributes on predicting your response variable.
+
+    i. (_10 points_) Remember to train your model on a training set and validate the model using a validation set.
+    ii. (_5 points_) Also remember, data cleaning is also a part of this assignment. You may have to remove a few unnecessary variables from this data set(for example: aritist_name,artist_id,..etc) for this analysis, but if you do, please justify why you removed them.
+    iii. (_15 points_) Remember you are fitting a FULL model with all the variables(except above mentioned unnecessary variables) and also check for interactions.
+
+### Removing unwanted variables
+```{r}
+# keep wanted variables
+vars <- c('ag.danceability', 'ag.energy', 'ag.key', 'ag.loudness', 'ag.speechiness', 'ag.acousticness', 'ag.instrumentalness', 'ag.liveness', 'ag.valence', 'ag.tempo', 'ag.duration_ms')
+
+# put the clean data into a new df
+df.clean <- df[, vars]
+```
+
+Above, we can see the variables I kept for this analysis. I removed other variables for the following reasons:
+
+- All variables whose data is in text format. I removed them because they can't be used for a regression analysis. Furthermore, this data is used mainly for identification purposes, so they shouldn't be impacting the tempo of the song.
+- All variables whose data was a date. Although an artist's music can change throughout the years, making the year/date info a possible good predictor, I think that working with date data as a predictor is outside the scope of this class. However, it would be a worthwhile experiment later on.
+- Repeated variables. Some variable (e.g. energy) seemed to be duplicated, so I excluded one of the repetitions.
+- Numerical data that were identifiers, such as track number, were removes. I don't believe the track order will affect a song's tempo (at least not consistently).
+
+### split data into train and test sets
+I decided to split the data with a ratio of 7:3.
+```{r}
+set.seed(42)
+smp_size <- floor(0.7 * nrow(df.clean))
+train_ind <- sample(seq_len(nrow(df.clean)), size = smp_size)
+train <- df.clean[train_ind, ]
+test <- df.clean[-train_ind, ]
+```
+
+### fit the model and check the parameter weights
+```{r}
+fit <- lm(ag.energy ~., data = train)
+summary(fit)
+```
+
+## Analyzing variable relationships
+c. (_10 points_) Do you see any in-significant variables? What are the variables that contribute to predicting your response variable?
+
+According to the fit summary, tempo, duration_ms, instrumentalness, and key are insignificant variables. Out of these, I'm only surprised that tempo doesn't influence the energy of a song. My guess would've been that the higher a tempo, the higher the energy.
+
+The variables that can contribute to my response variable are danceability, loudness, speechiness, acousticness, liveness, and valence. I know this because they all have a p-value smaller than 0.05; danceability has a score slightly over the threshold, so I will still include it in the next model for prediction.
+
+## Fitting a better model
+d. (_10 points_) Can you fit a better model? Fit a new model by removing these in-significant variables (but remember the hierarchy principle). Also remember to check for multicollinearity. Explain.
+
+
+```{r}
+# keeping the variables we want
+vars2 <- c('ag.energy', 'ag.danceability', 'ag.loudness', 'ag.speechiness', 'ag.acousticness', 'ag.liveness', 'ag.valence')
+
+# put the clean data into a new df
+df.clean2 <- df[, vars2]
+
+# train test split
+set.seed(42)
+smp_size <- floor(0.7 * nrow(df.clean2))
+train_ind <- sample(seq_len(nrow(df.clean2)), size = smp_size)
+train2 <- df.clean2[train_ind, ]
+test2 <- df.clean2[-train_ind, ]
+
+# fit the model
+fit2 <- lm(ag.energy ~ ., data = train2)
+summary(fit2)
+```
+
+The new model, with less variables, gave us an almost identical score as the previous model. I would assume that this is likely due to the removed variables having contributed basically nothing to the first predictive model.
+
+```{r}
+# multicollinearity
+library(car)
+set.seed(42)
+vif(fit2)
+```
+
+With all vif scores being under 1.5, I feel comfortable keeping them in the regression, given that they're not highly correlated. I will try another model that takes into account the interactions between the variables.
+
+```{r}
+fit3 <- lm(ag.energy ~ (.)^2, data=train2)
+summary(fit3)
+```
+
+Since this model has better results than the first two, I'll make one last attempt using the variables deemed important by this model.
+
+```{r}
+fit4 <- lm(ag.energy ~ ag.speechiness + ag.acousticness + ag.valence + ag.danceability*ag.acousticness + ag.loudness*ag.speechiness + ag.loudness*ag.acousticness + ag.speechiness*ag.acousticness, data=train2)
+summary(fit4)
+```
+
+It would appear that our best scores came from the third model.
+
+## Compare model performances
+e. (_10 points_) Which model is the better model? (part b or d?) Justify your answer by comparing the model (b) and model (d)  using  $R^2$, $RSE$, $RMSE$ and $F-statistic$.?
+
+```{r}
+library(caret)
+# fit
+predictions1 <- fit %>% predict(test)
+p1=data.frame(
+  RMSE = RMSE(predictions1, test$ag.danceability),
+  R2 = R2(predictions1, test$ag.danceability)
+)
+# fit2
+predictions2 <- fit2 %>% predict(test2)
+p2=data.frame(
+  RMSE = RMSE(predictions2, test2$ag.danceability),
+  R2 = R2(predictions2, test2$ag.danceability)
+)
+# fit3
+predictions3 <- fit3 %>% predict(test2)
+p3=data.frame(
+  RMSE = RMSE(predictions3, test2$ag.danceability),
+  R2 = R2(predictions3, test2$ag.danceability)
+)
+# Mfit4
+predictions4 <- fit4 %>% predict(test2)
+p4=data.frame(
+  RMSE = RMSE(predictions4, test2$ag.danceability),
+  R2 = R2(predictions4, test2$ag.danceability)
+)
+
+# summary statistics
+all =rbind(p1,p2,p3,p4)
+all=cbind(all, c(summary(fit)$fstatistic[1], summary(fit2)$fstatistic[1], summary(fit3)$fstatistic[1], summary(fit4)$fstatistic[1]))
+all=cbind(all,c(summary(fit)$adj.r.squared, summary(fit2)$adj.r.squared, summary(fit3)$adj.r.squared, summary(fit4)$adj.r.squared))
+all=cbind(all,c(summary(fit)$sigma, summary(fit2)$sigma, summary(fit3)$sigma, summary(fit4)$sigma))
+all = cbind(all, c('fit1','fit2','fit3','fit4'))
+colnames(all)[c(3,4,5,6)]<-c("F stat","Adj Rˆ2", "RSE","models")
+all
+```
+
+I tested each model with the test data to see its real-world performance. If I had to choose a model from part b or d, I would select the ones from part d. Fit 4 had the lowest RMSE and highest R2, so I would be inclined to select this model for future predictions. The RSE for Fit 4 was the second lowest and although the F stat is higher than two other models, we need to take into account that it's using more variables (including the variables that take into account relationship between variables).
+
+## Best predictors
+f. (_10 points_) What predictors contributes more to your response variable (Use the best model you choose from d)?  What can you tell about what you observe from this whole analysis and what you have known about her music? Are there any contrasting factors?
+
+For the second model of part d, which was the best-performing model, all of its variables had high significance. These variables are:
+
+- ag.speechiness
+- ag.acousticness
+- ag.valence
+- ag.danceability
+- ag.loudness
+- ag.acousticness:ag.danceability
+- ag.speechiness:ag.loudness
+- ag.acousticness:ag.loudness
+- ag.speechiness:ag.acousticness
+
+I expected the variables listed here, that come from the original data frame, to have an important influence on the song's energy. I think valence, danceability, and loudness specifically would've had a big effect on the energy variable, so I was happy to see them come out as significant predictors. For the additional variables that take into account interactions between all variables, I selected the ones listed above. I'm still a bit unsure about how these interactions work, but it improved the model, so I'm happy with the outcome. I don't know her music well and can't talk to that part of the question, but I surmise that the relationships we see in this regression model would show up in all types of music and not just hers. The only unsusual variable in my opinion is the speechiness one. With electronic music being some of the most energetic, I thought speechiness shouldn't affect the energy scores.
+
+## Comparing to previous quiz
+g. (_5 points_) Does this give you any new results to support what you observe in the last Quiz when you were analyzing this data? Explain.
+
+In the previous quiz I compared Ariana's and Kelly's danceability scores and found that Ariana's music, on average, has a significantly higher danceability score. If the predictors hold true across artists, I would then look at the correlations that my predictive variables have to the target variable (positive or negative) and make inferences about the scores that I should see for Kelly Clarkson. For example, if energy has a high correlation with danceability, I would expect to see Ariana Grande have a higher average energy than Kelly Clarkson; I could repeat the experiment with all significant variables found in model with Fit 4.
+
+## Is linear model good
+h. (_10 points_) Is a linear model adequate for this data? Justify your answer.
+
+Yeah, I think a linear model is an adequate choice. The R2 scores were all very high, meaning that the model can explain a big part of the target variable's variance. Additionally, the data at our disposal was mostly continuous, numerical data, so there were no difficulties having to include categorical or text data. There might be a better model to predict energy levels, but as a quick choice, this is one of the better ones.
+
+## Outliers
+i. (_10 points_) Please identify outliers, leverage points and high leverage points using residual plots (if there are any).
+```{r}
+par(mfrow=c(2,2))
+plot(fit2)
+```
+
+```{r}
+(outs <- influencePlot(fit2))
+```
+
+Both plots and the data frame show us the outliers. For the data frame, data observations 344, 336, 275, and 351 are all outliers. The first plot shows us the points that have leverage and high leverage, but their indexes get lost within the plot. I think oone of the numbers that pop up starts witha  3 and ends with a 5, but it's very difficult to make it out.
+
+
+
+
+

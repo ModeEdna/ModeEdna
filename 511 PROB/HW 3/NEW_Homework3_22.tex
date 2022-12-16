@@ -1,0 +1,366 @@
+% Options for packages loaded elsewhere
+\PassOptionsToPackage{unicode}{hyperref}
+\PassOptionsToPackage{hyphens}{url}
+%
+\documentclass[
+]{article}
+\usepackage{amsmath,amssymb}
+\usepackage{lmodern}
+\usepackage{iftex}
+\ifPDFTeX
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+  \usepackage{textcomp} % provide euro and other symbols
+\else % if luatex or xetex
+  \usepackage{unicode-math}
+  \defaultfontfeatures{Scale=MatchLowercase}
+  \defaultfontfeatures[\rmfamily]{Ligatures=TeX,Scale=1}
+\fi
+% Use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+\IfFileExists{microtype.sty}{% use microtype if available
+  \usepackage[]{microtype}
+  \UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\makeatletter
+\@ifundefined{KOMAClassName}{% if non-KOMA class
+  \IfFileExists{parskip.sty}{%
+    \usepackage{parskip}
+  }{% else
+    \setlength{\parindent}{0pt}
+    \setlength{\parskip}{6pt plus 2pt minus 1pt}}
+}{% if KOMA class
+  \KOMAoptions{parskip=half}}
+\makeatother
+\usepackage{xcolor}
+\usepackage[margin=1in]{geometry}
+\usepackage{color}
+\usepackage{fancyvrb}
+\newcommand{\VerbBar}{|}
+\newcommand{\VERB}{\Verb[commandchars=\\\{\}]}
+\DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}}
+% Add ',fontsize=\small' for more characters per line
+\usepackage{framed}
+\definecolor{shadecolor}{RGB}{248,248,248}
+\newenvironment{Shaded}{\begin{snugshade}}{\end{snugshade}}
+\newcommand{\AlertTok}[1]{\textcolor[rgb]{0.94,0.16,0.16}{#1}}
+\newcommand{\AnnotationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\AttributeTok}[1]{\textcolor[rgb]{0.77,0.63,0.00}{#1}}
+\newcommand{\BaseNTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\BuiltInTok}[1]{#1}
+\newcommand{\CharTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\CommentTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\CommentVarTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\ConstantTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\ControlFlowTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\DataTypeTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{#1}}
+\newcommand{\DecValTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\DocumentationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\ErrorTok}[1]{\textcolor[rgb]{0.64,0.00,0.00}{\textbf{#1}}}
+\newcommand{\ExtensionTok}[1]{#1}
+\newcommand{\FloatTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\FunctionTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\ImportTok}[1]{#1}
+\newcommand{\InformationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\KeywordTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\NormalTok}[1]{#1}
+\newcommand{\OperatorTok}[1]{\textcolor[rgb]{0.81,0.36,0.00}{\textbf{#1}}}
+\newcommand{\OtherTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{#1}}
+\newcommand{\PreprocessorTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\RegionMarkerTok}[1]{#1}
+\newcommand{\SpecialCharTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\SpecialStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\StringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\VariableTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\VerbatimStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\WarningTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\usepackage{graphicx}
+\makeatletter
+\def\maxwidth{\ifdim\Gin@nat@width>\linewidth\linewidth\else\Gin@nat@width\fi}
+\def\maxheight{\ifdim\Gin@nat@height>\textheight\textheight\else\Gin@nat@height\fi}
+\makeatother
+% Scale images if necessary, so that they will not overflow the page
+% margins by default, and it is still possible to overwrite the defaults
+% using explicit options in \includegraphics[width, height, ...]{}
+\setkeys{Gin}{width=\maxwidth,height=\maxheight,keepaspectratio}
+% Set default figure placement to htbp
+\makeatletter
+\def\fps@figure{htbp}
+\makeatother
+\setlength{\emergencystretch}{3em} % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\setcounter{secnumdepth}{-\maxdimen} % remove section numbering
+\ifLuaTeX
+  \usepackage{selnolig}  % disable illegal ligatures
+\fi
+\IfFileExists{bookmark.sty}{\usepackage{bookmark}}{\usepackage{hyperref}}
+\IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
+\urlstyle{same} % disable monospaced font for URLs
+\hypersetup{
+  pdftitle={Homework 3},
+  pdfauthor={Eduardo Armenta},
+  hidelinks,
+  pdfcreator={LaTeX via pandoc}}
+
+\title{Homework 3}
+\author{Eduardo Armenta}
+\date{}
+
+\begin{document}
+\maketitle
+
+\hypertarget{problem-1-10-points}{%
+\subsection{Problem 1 (10 Points)}\label{problem-1-10-points}}
+
+Consider a room that is paved with \(n \times n\) square tiles which are
+labeled from 1 to \(n^2\) in some order. A frog performs a random walk
+by hopping from one tile to a randomly chosen adjacent tile in each time
+step. All adjacent tiles are chosen with the same probability. The frog
+can never hop into a wall of the room.
+
+\textbf{True or not true:} The transition matrix for this random walk is
+symmetric, that is, it satisfies
+\(P(X_{i+1} = k| X_i = j) = P(X_{i+1} = j|X_i = k)\) for all \(i\) and
+all possible states \(1 \le j, \, k \le n^2\). Explain your answer.
+
+It is not symmetric. If you take the example of a 3x3 matrix, and the
+tiles are numbered from left to right, bottom to top, the 1st tile has a
+probability of 1/2 to go to tile 2, while tile 2 has a probability of
+1/3 to go to tile 1. For it to be symmetric, these probabilities would
+have to be the same.
+
+\hypertarget{problem-2-30-points}{%
+\subsection{Problem 2 (30 Points)}\label{problem-2-30-points}}
+
+Let \(X \sim B(80, .2)\) and \(Y \sim B(100, .7)\) be independent
+binomial random variables. Let \(Z = X + Y\) . Find the following
+conditional quantities, using R simulations:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{df }\OtherTok{\textless{}{-}} \FunctionTok{data.frame}\NormalTok{(}\AttributeTok{x=}\FunctionTok{rbinom}\NormalTok{(}\DecValTok{10000}\NormalTok{, }\DecValTok{80}\NormalTok{, .}\DecValTok{2}\NormalTok{), }\AttributeTok{y=}\FunctionTok{rbinom}\NormalTok{(}\DecValTok{10000}\NormalTok{, }\DecValTok{100}\NormalTok{, .}\DecValTok{7}\NormalTok{))}
+\NormalTok{df}\SpecialCharTok{$}\NormalTok{z }\OtherTok{\textless{}{-}}\NormalTok{ df}\SpecialCharTok{$}\NormalTok{x }\SpecialCharTok{+}\NormalTok{ df}\SpecialCharTok{$}\NormalTok{y}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{enumerate}
+\def\labelenumi{\alph{enumi})}
+\tightlist
+\item
+  \(P(X < 12|X < 18)\) and \(E(X|X < 18)\) (6 points)
+\end{enumerate}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# probability of x being less than 12 if x is less than 18}
+\FunctionTok{length}\NormalTok{(df}\SpecialCharTok{$}\NormalTok{x[df}\SpecialCharTok{$}\NormalTok{x}\SpecialCharTok{\textless{}}\DecValTok{12}\NormalTok{])}\SpecialCharTok{/}\FunctionTok{length}\NormalTok{(df}\SpecialCharTok{$}\NormalTok{x[df}\SpecialCharTok{$}\NormalTok{x}\SpecialCharTok{\textless{}}\DecValTok{18}\NormalTok{])}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 0.1468918
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# expected value}
+\FunctionTok{mean}\NormalTok{(df}\SpecialCharTok{$}\NormalTok{x[df}\SpecialCharTok{$}\NormalTok{x}\SpecialCharTok{\textless{}}\DecValTok{18}\NormalTok{])}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 14.0514
+\end{verbatim}
+
+\begin{enumerate}
+\def\labelenumi{\alph{enumi})}
+\setcounter{enumi}{1}
+\tightlist
+\item
+  the cumulative distribution function of \(X|(12 \le X \le 20)\) (plot
+  of the ecdf) (6 points)
+\end{enumerate}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{plot.ecdf}\NormalTok{(df}\SpecialCharTok{$}\NormalTok{x[df}\SpecialCharTok{$}\NormalTok{x}\SpecialCharTok{\textless{}=}\DecValTok{20} \SpecialCharTok{\&}\NormalTok{ df}\SpecialCharTok{$}\NormalTok{x}\SpecialCharTok{\textgreater{}=}\DecValTok{12}\NormalTok{])}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{NEW_Homework3_22_files/figure-latex/unnamed-chunk-3-1.pdf}
+
+\begin{enumerate}
+\def\labelenumi{\alph{enumi})}
+\setcounter{enumi}{2}
+\tightlist
+\item
+  the cumulative distribution function of \(X|Z = 90\) ( plot of the
+  ecdf )(6 points)
+\end{enumerate}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{plot.ecdf}\NormalTok{(df}\SpecialCharTok{$}\NormalTok{x[df}\SpecialCharTok{$}\NormalTok{z}\SpecialCharTok{==}\DecValTok{90}\NormalTok{])}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{NEW_Homework3_22_files/figure-latex/unnamed-chunk-4-1.pdf}
+d) \(E(Z|X = k)\) for \(k = 10, 15, 20\) . (6 points)
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{mean}\NormalTok{(df}\SpecialCharTok{$}\NormalTok{z[df}\SpecialCharTok{$}\NormalTok{x}\SpecialCharTok{==}\DecValTok{10} \SpecialCharTok{|}\NormalTok{ df}\SpecialCharTok{$}\NormalTok{x}\SpecialCharTok{==}\DecValTok{15} \SpecialCharTok{|}\NormalTok{ df}\SpecialCharTok{$}\NormalTok{x}\SpecialCharTok{==}\DecValTok{20}\NormalTok{])}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 85.90436
+\end{verbatim}
+
+\begin{enumerate}
+\def\labelenumi{\alph{enumi})}
+\setcounter{enumi}{4}
+\tightlist
+\item
+  \(E(X|Z = k)\) for \(k = 80, 90, 100\) . (6 points)
+\end{enumerate}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{mean}\NormalTok{(df}\SpecialCharTok{$}\NormalTok{x[df}\SpecialCharTok{$}\NormalTok{z}\SpecialCharTok{==}\DecValTok{80} \SpecialCharTok{|}\NormalTok{ df}\SpecialCharTok{$}\NormalTok{z}\SpecialCharTok{==}\DecValTok{90} \SpecialCharTok{|}\NormalTok{ df}\SpecialCharTok{$}\NormalTok{z}\SpecialCharTok{==}\DecValTok{100}\NormalTok{])}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 16.11394
+\end{verbatim}
+
+\hypertarget{problem-3-20-points}{%
+\subsection{Problem 3 (20 Points)}\label{problem-3-20-points}}
+
+Suppose \(X\) has an exponential distribution with parameter
+\(\lambda = 1\) and \(Y|X = x\) has a Poisson distribution with
+parameter \(x\).
+
+\begin{enumerate}
+\def\labelenumi{\alph{enumi})}
+\item
+  Generate at least 1000 random samples from the marginal distribution
+  of \(X\) and make a probability histogram. (4 Points)
+\item
+  Generate at least 1000 random samples from the conditional
+  distribution of \(Y|X = 1.5\) and make a probability histogram. (6
+  Points)
+\item
+  Generate at least 1000 random samples from the marginal distribution
+  of \(Y\) and make a probability histogram. (4 Points)
+\item
+  Generate at least 1000 random samples from the conditional
+  distribution of \(X|Y=2\) and make a probability histogram. (6 Points)
+\end{enumerate}
+
+\hypertarget{problem-4-20-points}{%
+\subsection{Problem 4 (20 Points)}\label{problem-4-20-points}}
+
+Suppose \(X\) and \(Y\) have independent standard normal distributions.
+Make at least 1,000 random samples from \(Z\), defined as
+\(Z = Y|(X + Y \ge 1)\). Do you think that \(Z\) has a normal
+distribution? What are its approximate mean and standard deviation?
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{df }\OtherTok{\textless{}{-}} \FunctionTok{data.frame}\NormalTok{(}\AttributeTok{x=}\FunctionTok{rnorm}\NormalTok{(}\DecValTok{10000}\NormalTok{), }\AttributeTok{y=}\FunctionTok{rnorm}\NormalTok{(}\DecValTok{10000}\NormalTok{))}
+\NormalTok{df}\SpecialCharTok{$}\NormalTok{z }\OtherTok{\textless{}{-}}\NormalTok{ df}\SpecialCharTok{$}\NormalTok{x}\SpecialCharTok{+}\NormalTok{df}\SpecialCharTok{$}\NormalTok{y}
+\NormalTok{Z }\OtherTok{\textless{}{-}}\NormalTok{ df[df}\SpecialCharTok{$}\NormalTok{z}\SpecialCharTok{\textgreater{}=}\DecValTok{1}\NormalTok{,]}
+\NormalTok{sampZ }\OtherTok{\textless{}{-}} \FunctionTok{sample}\NormalTok{(Z}\SpecialCharTok{$}\NormalTok{y,}\DecValTok{1000}\NormalTok{)}
+\FunctionTok{mean}\NormalTok{(sampZ)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 0.9591247
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{sd}\NormalTok{(sampZ)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 0.7869094
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{hist}\NormalTok{(sampZ)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{NEW_Homework3_22_files/figure-latex/unnamed-chunk-7-1.pdf}
+
+\hypertarget{problem-5-submit-only-part-1-and-part-4-practice-and-discuss-the-parts-2-and-3-with-classmates-20-points}{%
+\subsection{\texorpdfstring{Problem 5 (Submit only \emph{\emph{part 1}}
+and \emph{\emph{part 4}}; \emph{practice and discuss the parts 2 and 3
+with classmates}) (20
+Points)}{Problem 5 (Submit only part 1 and part 4; practice and discuss the parts 2 and 3 with classmates) (20 Points)}}\label{problem-5-submit-only-part-1-and-part-4-practice-and-discuss-the-parts-2-and-3-with-classmates-20-points}}
+
+\textbf{Mixtures.} Let \(Y_1\) and \(Y_2\) be two random variables which
+have the same range \(R\), and let \(w_1, w_2\) probabilities with
+\(w_1 + w_2 = 1\). Then the mixture \(Y\) of \(Y_1\) and \(Y_2\) is
+defined as follows:
+
+\begin{itemize}
+\item
+  Select \(X \in \{1,2\}\) at random, with
+  \(P(X = 1) = w_1, \, P(X = 2) = w_2\).
+\item
+  If \(X = 1\), draw a sample \(Y_1\) and set \(Y = Y_1\). Otherwise,
+  draw a sample \(Y_2\) and set \(Y = Y_2\).
+\end{itemize}
+
+\smallskip
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\item
+  Suppose \(E(Y_1) = \mu_1\) and \(E(Y_2) = \mu_2\). What is
+  \(E(Y|X = 1)\)? What is \(E(Y|X=2)\)? Use this to show that
+  \(E(Y) = w_1 \mu_1 + w_2 \mu_2\). (5 Points)
+\item
+  Suppose \(var(Y_1) = \sigma_1^2\) and \(var(Y_2) = \sigma_2^2\).
+  Explain why \(E(Y^2|X = 1) = \sigma_1^2 + \mu_1^2\) and
+  \(E(Y^2|X=2) = \sigma_2^2 + \mu_2^2\). Use this to find a formula for
+  \(E(Y^2)\).
+\item
+  Use the results of a) and b) to find a formula for \(var(Y)\).
+\item
+  Generate a sample of size 10,000 from
+  \(Y_1 \sim N(-2,1), \, Y_2 \sim N(2,2), \, w_1 = \frac{1}{3}, \, w_2 = \frac{2}{3}\)
+  and make a probability histogram. Clearly this is not a normal
+  distribution, and a mixture is not a sum! (15 Points)
+\end{enumerate}
+
+\hypertarget{bonus}{%
+\subsection{BONUS}\label{bonus}}
+
+Bob's preferred bet in American roulette consists in betting \$1 on
+black numbers and simultaneously \$2 on even numbers (see the roulette
+board in the course slides). Find all possible outcomes of a single game
+and their probabilities, that is, find the probability distribution of
+the outcome of a single bet. Then compute its expected value.
+
+(Hint: Since the question is asking about a single bet, you can
+calculate this by hand)
+
+Possible outcome probs: Black: 18/38 (would win \$2) Even: 18/38 (would
+win \$4) Loss: 20/38 (would lose \$3) Black and Even: 10/38 (would win
+\$6)
+
+We must take 10 away from black and even since black and even together
+has 10 possible outcomes. Calculate expected winnings on each round:
+2\emph{(8/38) + 4}(8/38) + 6*(10/38) = 2.84 are the expected winnings
+for each round
+
+\end{document}

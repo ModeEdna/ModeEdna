@@ -1,0 +1,177 @@
+---
+title: "Lab 5 Assignment"
+author: "Dr. Purna Gamage"
+
+output: rmdformats::robobook
+---
+
+## Problem 1 : Markov Chain Process. (Past Exam Question)
+
+(True Story) I want to do a Time Series Analysis on the Stock market prices of different companies in the US. I chose Alphabet Inc. (GOOG, GOOGL), Apple Inc. (AAPL) , Tesla Inc. (TSLA) and Amazon.com Inc. (AMZN).
+
+
+```{r, message=FALSE}
+library(quantmod)
+library(ggplot2)
+```
+
+```{r}
+options("getSymbols.warning4.0"=FALSE)
+options("getSymbols.yahoo.warning"=FALSE)
+
+tickers = c("GOOG","GOOGL","AAPL","TSLA", "AMZN")
+for (i in tickers){
+  getSymbols(i,
+             from = "2018-01-01",
+             to = "2022-08-01")}
+
+x <- list(
+  title = "date"
+)
+y <- list(
+  title = "value"
+)
+
+stock <- data.frame(GOOG$GOOG.Adjusted,
+                    GOOGL$GOOGL.Adjusted,
+                    AAPL$AAPL.Adjusted,
+                    TSLA$TSLA.Adjusted,
+                    AMZN$AMZN.Adjusted)
+
+
+
+stock <- data.frame(stock,rownames(stock))
+colnames(stock) <- append(tickers,'Dates')
+head(stock)
+
+str(stock)
+stock$date<-as.Date(stock$Dates,"%Y-%m-%d")
+
+ggplot(stock, aes(x=date)) +
+  geom_line(aes(y=GOOG, colour="GOOG"))+
+  geom_line(aes(y=GOOGL, colour="GOOGL"))+
+  geom_line(aes(y=AAPL, colour="AAPL"))+
+  geom_line(aes(y=TSLA, colour="TSLA"))+
+  geom_line(aes(y=AMZN, colour="AMZN"))+
+  ggtitle("Adjusted Closing Price for Companies from 2015 to 2021")
+```
+
+
+
+Before diving into Time Series modeling, I decided to monitor the market behavior for 5 Companies using Stocktwits App, which taps into the heart of the markets with millions of other investors and traders and can get instant access to professional analysis, market sentiment, trending stocks, trading ideas, new market trends and more.
+
+    _"Whenever I want to know why something is happening to a company, the first thing I do is check out the real-time feeds on Stocktwits."- Herb Greenberg, CNBC_
+
+   Some of the FEATURES of the App:  
+
+   Trending Tickers: know what stocks are being discussed the most each day.
+
+   Market Sentiment: track real-time bullish and bearish sentiment on nearly every equity, crypto, currency, index or commodity.
+
+   Social Feed: experience dynamic media - share commentary and ideas with charts, photos and GIFs. Share, like, reply to posts, and follow other investors.
+
+   Earnings Calendar: know exactly when companies are reporting earnings.
+
+   News: featured and trending stories from places like the Financial Times, Wall Street Journal and more.
+
+   Watch list: easily track your portfolio by adding stocks, indices, ETFs, FX, and crypto currencies to your personal Watch list.
+
+![](stock.png){width=50%}
+
+For a given day I randomly start with one of these 6 companies and keep monitoring each company 30 minutes at a time. I will only monitor the App during regular trading hours for the New York Stock Exchange (NYSE) and Nasdaq Stock Market 9:30 a.m. to 4 p.m. Eastern on weekdays. 
+
+If I watch AAPL then there is an equally likely chance for me to check AMZN, GOOG,GOOGL, TSLA or AAPL. Every time, I would monitor the same company as the one I am currently monitoring, in the next 30 minutes, given the popularity of it among the other investors and the traders. 
+
+Since, GOOG and GOOGL are coming from the same company (Tickers GOOG and GOOGL are both Alphabet stock, but they represent two different share classes. There's not much of a difference between owning shares of GOOG or GOOGL at this point. Both shares represent an equal ownership stake in Alphabet), I would never watch them together in 2 consecutive time periods. 
+
+If I monitor AMZN, there is twice as likely chance to watch APPL as watching GOOGL next. 
+
+I will only watch TSLA after watching GOOG or GOOGL. There is 4 times chance of going to TSLA after watching GOOG or GOOGL, as the chance of watching them (GOOG , GOOGL respectively) again in the next 30 minutes. But if I watch TSLA, I will only watch AAPL or again TSLA with equal chances just as I do when I start watching AMZN.
+
+In the problem, if I haven’t mentioned any monitoring among 2 companies, it’s because that I don’t monitor them together.
+
+
+a. Explain in few words, why this process is a Markov Process.
+
+The states are clearly defined and you can switch between them. The time intervals are finite at 30 minutes each.
+
+b. Set up a diagram to illustrate this Markov Process. (Define state 1 to 5, "GOOG","GOOGL","AAPL","TSLA" , "AMZN" respectively)
+
+(If you are doing it by hand, You can save your image to the current folder and load it here using this code ![](diagram2.png){width=80%}
+
+c. Using the transition probabilities stated in the problem, construct the transition probability matrix.
+
+```{r}
+(pm = matrix(c(.2,0,.2,0,0,0,.2,.2,0,.25,0,0,.2,.5,.5,.8,.8,.2,.5,0,0,0,.2,0,.25), ncol = 5))
+```
+
+d.  For a given day, if I start watching AAPL stock(at 9.30 a.m), what is the probability that I will end up monitoring TSLA at the end of the day? (4.00 p.m). 
+
+```{r}
+# function to compute matrix powers, using the same one as the diary
+powerP = function(A,n){
+  B <- 0*A
+  diag(B) <- 1
+  
+  for (j in 1:n){
+    B <- B%*%A
+    }
+  return(B)
+} 
+powerP(pm,13)[3,4]
+```
+
+## Problem 2
+
+Consider the random walk performed by the caveman in the class slides. 
+
+a) Using the transition matrix that was derived in class, compute $P(X_3 = 3 | X_0 = 1)$. Then do the same computation directly. 
+
+```{r}
+# setting up the matrix
+P <- matrix(0, ncol = 9, nrow = 9)
+diag(P) <- 1/2
+P[1,2] <- P[1,4] <- 1/4
+P[2,1] <- P[2,3] <- P[2,5] <- 1/6
+P[3,2] <- P[3,6] <- 1/4
+P[4,1] <- P[4,5] <- P[4,7] <- 1/6
+P[5,2] <- P[5,4] <- P[5,6] <- 1/6
+P[6,3] <- P[6,5] <- 1/4
+P[7,4] <- P[7,8] <- 1/4
+P[8,7] <- P[8,9] <- 1/4
+P[9,9] <- 1
+
+# probabilites of getting to room three from room 1 : all different possible paths
+(1/4)*(1/6)*(1/2) + (1/2)*(1/4)*(1/6) + (1/4)*(1/2)*(1/6)
+
+# using the function to calculate it. it's the same number
+powerP(P,3)[3,1]
+```
+
+What does this probability mean? 
+
+This represents the probability of being in space 3, having started on space one, after three steps.
+
+b) Find the first time $T$ such that the chance of the caveman's survival for more than $T$ steps is less than 25 \% no matter where he starts, using __R__.
+
+
+```{r}
+for(i in 1:200){
+  if(min(powerP(P,i)[,9]) > 0.75){
+    print(i)
+    break
+  }
+  else{
+    next
+  }
+}
+```
+
+Recreating the matrix to confirm the loop's result:
+```{r}
+powerP(P,164)
+```
+
+i.e find T such that $P(X_T = 9|X0 =k) \ge .75$ for all $k$ and $P(X_{T-1}|X_0=j) <0.25 $ for at least one $j$.
+
+(Hint:Assuming the caveman starts in position $j < 9$ and goes $k$ steps, he will be dead with probability $p = P^k_{j9}$. Thus he will survive with probability $< 0.25$ no matter where he starts if $P^k_{j9} > .75$ for all $j$.)

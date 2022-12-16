@@ -1,0 +1,118 @@
+---
+title: "Lab 2.1"
+author: "Eduardo Armenta"
+date: "2022-09-14"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r queen after getting queen}
+suits <- c("Diamonds", "Clubs", "Hearts", "Spades")
+numbers <- c("Ace", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine", "Ten", "Jack", "Queen", "King")
+(deck <- expand.grid(number=numbers, suit=suits)) #data frame from all combinations
+```
+
+## Lab 2.1 ANLY511 Section 01 Lab 03
+
+What is the difference between %in% and ==?
+%in% will search through values and see if one of them equal your specified value (e.g. 5%in% c(1, 2, 3, 4, 5) will give a True)
+== can only be used to compare two variables (e.g. 3==3 will yield a True, c(1, 2)==c(1,2) will yield a True)
+
+Try to find the probabilities for the below questions with a different set of coding without using %in%.
+
+Let’s use the deck of cards generated in Example 2 and please answer the following questions below with a different set of coding without using %in%.
+(i). Probability of getting the first card a Queen card?
+```{r probability queen}
+sum(deck$number == 'Queen') / length(deck$number)
+```
+
+(ii). Conditional probability of the second card being a Queen given that the first card was a Queen?
+```{r probability of getting queen after drawing a queen}
+((sum(deck$number == 'Queen') -1) / (length(deck$number)-1))
+```
+
+Refer to Example 3: Compute the Probability of a Natural 21 in Blackjack with a different set of coding without using ‘%in%’.
+
+```{r cars}
+# probability of getting a face card followed by an ace, add prob of getting ace followed by face card
+(sum(deck$number == 'Queen')*4/length(deck$number)) * (sum(deck$number == 'Ace')/(length(deck$number)-1)) +
+  (sum(deck$number == 'Ace')/(length(deck$number))) * (sum(deck$number == 'Queen')*4/(length(deck$number)-1))
+```
+
+## Problem 2:
+
+(This is fictional) It is believed that for COVID-19 a highly sensitive test has a low false-negative rate. A highly specific test has a low false-positive rate. In a certain testing center, they have found out that for a certain COVID-19 testing, the test is positive `88%` of the time when tested on a patient with the disease (high sensitivity). The test is negative `90%` of the time when tested on a healthy patient (high specificity). Probability of having COVID-19 is `0.25` for the patients come to that testing center.
+
+a. Specify each probability using conditional probability notations
+
+$P(test+|disease) =0.88$
+
+$P(test-|healthy) =0.90$
+
+$P(test+|healthy) =0.10$
+
+$P(test-|disease) =0.12$
+
+$P(disease) =0.25$
+
+$P(healthy) =0.75$
+
+b. Set the seed. Let's try this example for 1,000,000 simulations. 
+
+```{r set seed}
+set.seed(1009)
+```
+
+Let's assume that the patients arrive at this testing center are testing only for the Corona Virus. Simulate 1000000 patients coming to this testing center using sample() and specifying the probabilities of the disease. (Name the variable as "disease")
+
+```{r disease}
+disease <- sample(c(0,1), size=1000000, replace=TRUE,prob=c(0.75,0.25))
+```
+
+c. Simulate 1000000 tests for these patients. First, generate an empty vector for "test". Then fill in the values 0 and 1 where "disease=0" is the set of patients who does not have the virus and "disease=1" is the set of patients who have the virus. 
+(Hint: use sample() function for creating each subsets )
+
+```{r simulation}
+test <- rep(NA, 1000000) # create a dummy variable first
+test[disease==0] <- sample(c(0,1), size=sum(disease==0), replace=TRUE, prob=c(0.9,0.1))
+test[disease==1] <- sample(c(0,1), size=sum(disease==1), replace=TRUE,prob=c(0.12, 0.88))
+```
+
+_Answer the following questions by first calculating by hand and then using the simulations. Compare your results._
+
+d. What is the probability that a test is positive? Remember the formula for conditional probability. $P(A \mid B) = \frac{P(A \cap B)}{P(B)}$
+
+By hand: 0.295. Summed the number of + tests per category and divided it by total tests.
+```{r 2d}
+# in code
+mean(test)
+```
+The results are very similar; almost identical.
+
+e. Calculate the probability that a patient has the disease if the test is positive.
+By hand: 0.7457. Got it by dividing the amount of positive cases over positive tests.
+```{r 2e}
+mean(disease[test==1]==1)
+```
+Again, the probabilities are almost the same. However, the relative difference in result is bigger for this one.
+
+f. What is the probability that an individual has the disease if the test is negative?
+By hand:0.04347. Used conditional probability formula for this.
+```{r 2f}
+mean(disease[test==0]==1)
+```
+
+g. Given someone tested positive for the disease, how many times more likely are they to have the disease than someone from the general population?
+(Hint: First calculate the probability of having the disease given a positive test, then divide by the probability of having the disease.)
+By hand: ~3X as likely. Prob of disease given positive was previously done in E and prob of disease is 0.25. I just compared one to the other.
+```{r 2g}
+mean(disease[test==1] == 1)/mean(disease== 1)
+```
+Although the differences are relatively similar, I think the range in results is due to rounding decimals in my manual calculations.
+
+## Problem 3: No submission needed
+
+Discuss with your group members the past exam question in the Lab 2 Diary. Discuss how the simulation done according to the problem at hand and how the probabilities are calculated.

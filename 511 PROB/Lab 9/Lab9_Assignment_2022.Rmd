@@ -1,0 +1,252 @@
+---
+title: "Lab 9 Assignment"
+author: "Dr. Purna Gamage"
+
+output: rmdformats::robobook
+---
+
+
+## Problem 1: 
+
+Import the data from Flight Delays into R. Although the data are on all UA and AA flights flown in May and June of 2009, we will assume these represent a sample from a larger population of UA and AA flights flown under similar circumstances. We will consider the ratio of means of the flight delay lengths, $\mu UA/ \mu AA$.
+
+```{r}
+library(ggplot2)
+library(boot)
+df <- read.csv('./FlightDelays.csv')
+```
+
+(a)  Perform some exploratory data analysis(EDA) on flight delay lengths for each of UA and AA flights(look at some plots). Comment on your results.
+
+```{r}
+UA <- subset(df, df['Carrier']=='UA')
+AA <- subset(df, df['Carrier']=='AA')
+```
+
+```{r}
+ggplot(UA, aes(Delay)) +
+  geom_histogram(binwidth=10)
+```
+
+```{r}
+ggplot(AA, aes(Delay)) +
+  geom_histogram(binwidth = 10)
+```
+
+### Comments
+AA has more records than UA, so we'll have to bootstrap UA. In terms of the distributions, they're both very similar. They look exponential and trails off after the 100-minute mark.
+
+(b) Bootstrap the mean of flight delay lengths for each airline separately and plot and describe the distribution.
+
+```{r}
+# Using code from Prof. Gamage's slides
+N <- 10000
+delays.UA <- df$Delay[df$Carrier == 'UA']
+delays.AA <- df$Delay[df$Carrier == 'AA']
+
+n.UA <- length(delays.UA)
+n.AA <- length(delays.AA)
+
+UA.boot <- replicate(N,mean(sample(delays.UA, n.UA, replace=TRUE)))
+AA.boot <- replicate(N,mean(sample(delays.AA, n.AA, replace=TRUE)))
+
+par(mfrow = c(1,2))
+hist(UA.boot, breaks = 50, prob=T)
+hist(AA.boot, breaks = 50, prob=T)
+```
+
+### Describe distribution
+The distributions are both normal, which is what we were hoping for.
+
+(c) Bootstrap the ratio of means. Provide plots of the bootstrap distribution and describe the distribution.
+
+```{r}
+ratio.boot <- UA.boot/AA.boot
+hist(ratio.boot)
+```
+
+### Describe the distribution
+Again, the distribution is close to normal, also what we were looking for.
+
+(d) Find the 95% bootstrap percentile interval for the ratio of means. Interpret this interval.
+
+```{r}
+quantile(ratio.boot, c(.025, .975))
+```
+
+### Interpret
+These numbers tell us that there is a 95% chance that the mean delay of UA is 1.27 to 1.97 times longer than the mean delay for AA.
+
+(e) What is the bootstrap estimate of the bias for the mean ratio?
+
+```{r}
+
+mean(ratio.boot)-(mean(delays.UA)/mean(delays.AA))
+```
+
+
+## Problem 2: Hypothesis testing using bootstrap approach.
+(Chihara2011)
+
+Import the data set Titanic.csv which contains survival data (0 = death, 1 = survival) and ages of 658 passengers of the Titanic which sank on April 15, 1912 (the day when Americans had to file income tax returns for the first time). Examine the null hypothesis that the mean ages of survivors and of victims are the same against the alternative that these mean ages are different, using a bootstrap approach.
+
+```{r}
+Titanic = read.csv("Titanic.csv",stringsAsFactors=FALSE)
+head(Titanic)
+```
+
+Let's make a hypothesis. Are two population means different?
+
+Null Hypothesis: Mean ages of survivors and of victims are the same. (That means that there is no difference between the two population means)
+
+Let's use the bootstrap approach.
+
+a. First let's separate the two samples "survivors(=1)" and "victims(=0)".
+
+```{r}
+t.survived <- Titanic$Age[Titanic$Survived == 1]
+t.died <- Titanic$Age[Titanic$Survived == 0]
+```
+
+b. Make many bootstrap samples(100000) of difference of sample means. 
+
+```{r}
+n.t.survived <- length(t.survived)
+n.t.died <- length(t.died)
+
+survived.boot <- replicate(N,mean(sample(t.survived, n.t.survived, replace=TRUE)))
+died.boot <- replicate(N,mean(sample(t.died, n.t.died, replace=TRUE)))
+
+hist(died.boot-survived.boot, breaks = 50, prob=T)
+
+mean(died.boot-survived.boot)
+```
+
+c. Make a 90% percentile  bootstrap confidence interval for the difference estimate. Using this CI, conclude on your hypothesis. 
+
+Null Hypothesis: Mean ages of survivors and of victims are the same. (That means that there is no difference between the two population means)
+
+```{r}
+ci.1 <- quantile((died.boot-survived.boot), c(.05, .95))
+ci.1
+```
+
+Since there is a 90% probability that the average difference in age for those who survived and those who didn't falls between 2.17 and 6.95, we can assume that the null hypothesis is wrong.
+
+d. Make a 95% percentile bootstrap confidence interval for the difference estimate and using this CI, conclude on your hypothesis. 
+
+```{r}
+ci.2 <- quantile((died.boot-survived.boot), c(.025, .975))
+ci.2
+```
+
+Since there is a 95% probability that the average difference in age for those who survived and those who didn't falls between 1.65 and 7.4, we can assume that the null hypothesis is wrong.
+
+Null Hypothesis: Mean ages of survivors and of victims are the same. (That means that there is no difference between the two population means)
+
+## Problem 3 (BONUS -5 points)
+
+Load the Bangladesh data. We made inference about Arsenic in water in the Lab 9. Let's make inference about Cobalt.
+
+```{r}
+bdesh <- read.csv("Bangladesh.csv")
+head(bdesh)
+```
+
+a. Plot the boxplot of Cobalt. What's look wrong? Do you think a transformation can explain the data better?
+
+```{r}
+boxplot(bdesh$Cobalt)
+```
+
+There seem to be a lot of outliers in the data, so it might not be a normal distribution. Also, the mean isn't centerd, instead, it's closer to the edge. A histogram would better visualize the distribution.
+
+b. Make a log transformation of the data (Cobalt) and plot the boxplot. What do you see differently? Comment.
+
+```{r}
+log.cobalt <- log(bdesh$Cobalt)
+boxplot(log.cobalt)
+```
+
+After the transformation, the boxplot is much closer to a normal distribution. Its mean is also closer to the middle and there are few outliers.
+
+c. Are there an missing values? If so, remove the missing values and draw bootstrap samples(10000) of sample mean. (remember we are still using the log transformation)
+
+```{r}
+# check for missing values
+colSums(is.na(bdesh))
+# remove missing values
+bdesh.2 <- bdesh[!is.na(bdesh$Cobalt),]
+# add a row with the log values
+bdesh.2$Cobalt.log <- log(bdesh.2$Cobalt)
+
+# samples
+bdesh2.logs <- bdesh.2$Cobalt.log
+n.logs <- length(bdesh2.logs)
+
+log.cobalt.boot <- replicate(10000, mean(sample(bdesh2.logs, n.logs, replace=TRUE)))
+
+hist(log.cobalt.boot, breaks = 50, prob=T)
+
+```
+
+d. What is the bias?
+
+```{r}
+mean(log.cobalt.boot) - mean(bdesh2.logs)
+```
+
+e. Find the standard error of the bootstrap estimate. 
+
+```{r}
+set.seed(42)
+sd(log.cobalt.boot)
+```
+
+Also, calculate the estimate(using the bootstrap sample) of mean squared error(MSE) =var(X)+ (bias)^2
+
+```{r}
+set.seed(42)
+var(log.cobalt.boot) + (mean(log.cobalt.boot) - mean(bdesh2.logs))^2
+```
+
+Comment on your results.
+
+I'm actually a bit confused by the results and can't make much sense of them. I tend to get confused when dealing with logs. I think there's a small standard deviation for the bootstrap and the MSE seems to be close to 0%, so the predictions, or samples, are very similar to the real thing.
+
+f. Make a 95% Percentile Bootstrap CI for mean of log transformed(log10) Cobalt data.  Comment on your results.
+
+```{r}
+ci.3 <- quantile(log.cobalt.boot, c(.025, .975))
+ci.3
+```
+
+This is telling us that there is a 95% chance that the average log value of Cobalt in the wells will be between -0.98 and -0.82.
+
+g. Repeat the bootstrap sampling process to estimate the median of the actual data(Cobalt- no transformation).
+
+```{r}
+# samples
+bdesh2.cobalt <- bdesh.2$Cobalt
+n.cobalt <- length(bdesh2.cobalt)
+
+cobalt.boot <- replicate(10000, mean(sample(bdesh2.cobalt, n.cobalt, replace=TRUE)))
+
+hist(cobalt.boot, breaks = 50, prob=T)
+```
+
+h. Find the bias and the standard error of the bootstrap estimate. Comment on your results. 
+
+```{r}
+# bias
+mean(cobalt.boot) - mean(bdesh2.cobalt)
+```
+
+The bias is almost nonexistent, which is expected after taking so many samples.
+
+```{r}
+# standard error
+sd(cobalt.boot)
+```
+
+Although not the same, it's pretty close to the standard error from the previous exercise.

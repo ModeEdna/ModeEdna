@@ -1,0 +1,689 @@
+---
+title: "Lab 10"
+author: "Dr. Purna Gamage"
+
+output: rmdformats::robobook
+---
+
+```{r, echo=FALSE, message=FALSE}
+library(ggplot2)
+library(ggExtra)
+library(tidyverse)
+library(plotly)
+library(dplyr)
+library(knitr)
+```
+
+# Z-test
+ (Usually This is not being used with real data )
+
+```{r, eval=FALSE}
+z.test(x, y, alternative='two.sided', mu=0, sigma.x=NULL, sigma.y=NULL,conf.level=.95)
+```
+
+
+# T-test
+
+## a. One sample t-test
+
+### Example 1:
+
+Here is an example concerning daily energy intake in kJ for 11 women (Altman, 1991, p. 183). First, the values are placed in a data vector:
+
+```{r}
+daily.intake <- c(5260,5470,5640,6180,6390,6515,6805,7515,7515,8230,8770)
+
+```
+
+You might wish to investigate whether the women’s energy intake deviates systematically from a recommended value of 7725 kJ. Assuming that data come from a normal distribution, the object is to test whether this distribution might have mean $\mu = 7725$. This is done with t.test as follows:
+
+Null Hypothesis: $H_0$ :  $\mu = 7725$
+Alternative Hypothesis: $H_a$ :  $\mu \neq 7725$
+
+```{r}
+t.test(daily.intake,mu=7725)
+```
+
+Since p value is less than 0.05, At 5% significance level, we have enough evidence to reject the null hypothesis and conclude that a women’s energy intake deviates systematically from a recommended value of 7725 kJ.
+
+## b. Two-sample t-test
+
+### Example 2: Birth weight of a baby "NCBirths2004.csv"
+
+The birth weight of a baby is of interest to health officials since many studies have shown possible links between this weight and conditions in later life, such as obesity or diabetes. Researchers look for possible relationships between the birth weight of a baby and the age of the mother or whether or not she smoked cigarettes or drank alcohol during her pregnancy. The Centers for Disease Control and Prevention (CDC), using data provided by the U.S. Department of Health and Hu- man Services, National Center for Health Statistics, the Division of Vital Statistics as well as the CDC, maintain a database on all babies born in a given year <http://wonder.cdc.gov/natality-current.html>. We will investigate different samples taken from the CDC’s database of births.
+
+One data set we will investigate consists of a random sample of 1009 babies born in North Carolina during 2004. The babies in the sample had a gestation period of at least 37 weeks and were single births (i.e., not a twin or triplet).
+
+
+```{r}
+NCBirths2004<-read.csv("NCBirths2004.csv")
+head(NCBirths2004)
+
+library(tidyverse)
+library(ggplot2)
+
+NCBirths2004 %>%
+  ggplot( aes(x = Smoker, y = Weight, fill=Smoker)) +
+  geom_boxplot() +ggtitle("Weight of babies born
+in North Carolina in 2004")
+```
+
+```{r}
+WeightNS <- subset(NCBirths2004, select=Weight,
+                      subset=Smoker=="No", drop=T)
+
+WeightS  <- subset(NCBirths2004, select=Weight,
+                      subset=Smoker=="Yes", drop=T)
+
+t.test(WeightNS, WeightS, alt="greater")
+```
+
+### Example 3: Two sample t-test on Titanic Data
+
+
+Import the data set Titanic.csv which contains survival data (0 = death, 1 = survival) and ages of 658 passengers of the Titanic which sank on April 15, 1912. Examine the null hypothesis that the mean ages of survivors and of victims are the same against the alternative that these mean ages are different, using a t-test. Compute the p-value and state your conclusion. This is a two-sided test. How should the p-value be computed in this case?
+
+Import the data. There are 135 survivors and 523 victims in this data set. We can make a side by side boxplot and see that the age distributions of survivors and victims are very similar, but survivors have a slightly smaller median. The mean age of survivors is 26.98 and the mean age of victims is 31.52. The difference is 4.54.
+
+```{r}
+ Titanic <- read.csv("Titanic.csv", stringsAsFactors=FALSE) 
+head(Titanic)
+boxplot(Age ~ Survived, data = Titanic)
+
+#let's look at the means
+agg.df <- aggregate(Age ~ Survived, data = Titanic, FUN = mean)
+print(agg.df)
+
+(mean.diff <- agg.df[1,2] - agg.df[2,2])
+```
+
+Let $\mu_S =$ population mean age of survivors and $\mu_v =$ population mean age of victims. 
+
+The null hypothesis is $H_0: \mu_V - \mu_S = 0$ and the 
+alternative is $H_a: \mu_V - \mu_S > 0$.   
+
+```{r}
+survivors <- subset(Titanic, select=Age, subset=Survived=="1", drop=T)
+victims <- subset(Titanic, select=Age,subset=Survived=="0", drop=T)
+
+t.test(victims, survivors, alt="greater")
+
+###or
+
+t.test(Age ~ Survived, data = Titanic,alternative = "greater")
+```
+
+Since p value is less than 0.05, At 5% significance level, we have enough evidence to reject the null hypothesis. Therefore there is strong evidence that the mean ages of victims and survivors were not the same but in fact the average age of victims were greater than the average age of survivors.
+
+
+# Chi squared test
+
+## a. One way table
+
+Define a function to compute chi-squared statistic for one-way tables and let x contains counts of observations. 'pvec' is a probability vector of observations.
+
+![](1.png)
+
+```{r}
+myX2 = function(x,pvec){ #x-count, #pvec-probabilities
+   n <- sum(x) #size
+   k <- length(pvec) #length of the prob vector
+   pvec <- pvec/sum(pvec) #normalize the prob vector, if necessary
+   expected <- n*pvec #np
+   return(sum((x-expected)^2/expected))
+}
+```
+
+
+(ii). Demonstration Example.
+
+![](5.png)
+
+Let's simulate a single random multinomial sample of size 40 with probabilities 0.3,0.3,0.2,0.2.
+
+```{r}
+
+(x0 <- rmultinom(1,40,prob = c(.3,.3,.2,.2))) #like 40 people buying 4 items
+colSums(x0)
+
+```
+
+
+(iii) Compute Chi-squared statistic, assuming the null hyothesis. 
+
+```{r}
+#specify the null distribution (which  we know is wrong)
+pvec.0 = c(.2,.2,.3,.3) # probabilities for null distribution
+
+X2.obs <- myX2(x0, pvec.0)
+X2.obs
+
+p.value=pchisq(X2.obs,df=4-1,lower.tail = FALSE)
+p.value
+```
+
+At 5% significance level we can reject the null hypothesis and conclude that we have enough evidence to say that our data does not come from a multinomial distribution with probabilities (.2,.2,.3,.3).
+
+(iv) Alternatively: Obtain the Null distribution.
+
+```{r}
+X2.null <- replicate(10000, myX2(rmultinom(1,size = 40,prob = pvec.0),pvec.0)) #null distribution obtain by replicating the experiment 10,000
+
+## Null distribution
+
+hist(X2.null, prob = T, xlim = c(0,20), col = "forestgreen", main="Null Distribution")                     
+abline(v = X2.obs, col = 2) #test statistic value
+
+
+
+#p-value
+mean(X2.null > X2.obs) #p-value  : Probability or fraction of times extreme values observed than the test statistic calculated by assuming null is true                  
+
+```
+
+
+(v) You can also use the Chi squared test:
+
+```{r}
+chisq.test(x0, p = pvec.0)
+```
+
+Reject the null hypothesis at 0.05 significance level and conclude that we have enough evidence to say that our data does not come from a multinomial distribution with probabilities (.2,.2,.3,.3).
+
+
+
+
+
+
+## Two-way table
+
+## Example 5
+
+(a) Import gss2002 data
+
+```{r}
+gss2002 <- read.csv("gss2002.csv")
+
+head(gss2002)
+```
+
+(b) Make a few one-way tables
+
+```{r}
+table(gss2002$Region) #7 different regions
+sum(is.na(gss2002$Region))#NA?
+
+table(gss2002$Race) #3 Race
+sum(is.na(gss2002$Race))
+
+table(gss2002$Politics)
+sum(is.na(gss2002$Politics))#lot of NAs
+
+#clean the Politics variable
+gss2002.clean <- gss2002[!is.na(gss2002$Politics),]
+
+sum(is.na(gss2002.clean$Politics))
+
+
+##or
+
+#not very good to do it this way, because you will loose information 
+#gss2002.clean = na.omit(gss2002)
+#sum(is.na(gss2002.clean$Happy))
+```
+
+(c) Make a two-way table of Region and Politics.
+
+```{r}
+table(gss2002.clean$Region, gss2002.clean$Politics)
+
+# This is a 7 x 7 table.
+# is there a connection? Are there any characteristics in different regions? for example, North Central is moderate  than other regions. or People in North central is more conservative than the other regions.
+```
+
+(d) Chi-square statistic for a two-way table (treated as a matrix).
+
+Let's practice by calulating the test statistic by hand.
+
+```{r}
+gss2002.clean <- gss2002[!is.na(gss2002$Politics) & !is.na(gss2002$Region),]
+
+A <- table(gss2002.clean$Region, gss2002.clean$Politics)
+A
+
+(r <- rowSums(A)) #how many individuals in each Region
+(c <- colSums(A)) #how many individuals for each Political view
+
+N = sum(A)
+
+expected <- outer(r,c)/N #multiplying all possible combinations by 'outer()' function
+
+expected [1,1] #check the first cell-expected count
+A[1,1] # check the observed value for this entry
+
+#let's write a function to do this
+myX2.2 = function(A){
+  r <- rowSums(A)
+  c <- colSums(A)
+  N = sum(A)
+  expected <- outer(r,c)/N
+  return(sum((A-expected)^2/expected))
+}
+```
+
+
+(e) Compute Chi square statistic for GSS 2002 data
+
+```{r}
+x2=myX2.2(table(gss2002.clean$Region, gss2002.clean$Politics))
+pchisq(x2, df = (7-1)*(7-1), lower.tail = F) #p-value
+```
+
+Since the p-value is less than 0.05, at 0.05 significance we reject H0.We have enough evidence to conclude that there is a relationship between the Region and Political views of people in the US.
+
+
+## Example 6:Homogeneity of populations.
+
+_Examine happiness levels by gender_ 
+
+
+```{r}
+gss2002.clean2 <- gss2002[!is.na(gss2002$Gender) & !is.na(gss2002$Happy),]
+
+tableGH= table(gss2002.clean2$Gender, gss2002.clean2$Happy)
+kable(tableGH) #nice table representation
+
+myX2.obs <- myX2.2(tableGH)
+
+pchisq(myX2.obs, df = (2-1)*(3-1), lower.tail = F)
+
+```
+
+Or you can do the Chi squared test using Chis1.test()
+
+```{r}
+chisq.test(tableGH)
+
+```
+
+since p-value is less than 0.05, at 5\% significance level, we reject the null hypothesis and we have enough evidence to conclude that the happiness levels are different for different genders.(or there is a relationship between the happiness and the gender)
+
+
+#### Examine outputs:
+
+```{r}
+test.1 <- chisq.test(tableGH)
+names(test.1)
+
+test.1$parameter
+test.1$method
+test.1$observed
+
+test.1$residuals
+test.1$stdres #standardized residuals
+```
+
+Check if the Yate's continuity correction is needed?
+
+This is needed when expected cell counts are very small(<=5).
+
+```{r}
+A <- table(gss2002.clean2$Gender, gss2002.clean2$Happy)
+
+r <- rowSums(A)
+c <- colSums(A)
+N = sum(A)
+expected <- outer(r,c)/N
+expected
+```
+
+
+```{r}
+#equivelently
+test.1$expected
+
+```
+
+No need of the Yate's continuity correction.
+
+# Permutation test. 
+
+## Example 4: Permutation test for mouse data
+
+```{r}
+load("mice.rdata")
+print(mice)
+
+#demontration
+(mice[sample(24,6, replace = F),]) #sample 6 from 24 observations, just to look at the data
+```
+
+
+(a). We use the test statistic $\bar x_c - \bar x_t$.
+
+(i) Compute these means with the __aggregate()__ function.
+
+```{r}
+aggregate(time ~ pop, data = mice, FUN = mean)
+```
+
+
+(ii) Define a function to compute the test statistic; $\bar x_c - \bar x_t$.
+
+```{r}
+
+mytest.1 = function(mydf){
+  agg = aggregate(time ~pop, data = mydf, FUN = mean)
+  return(agg$time[1] - agg$time[2]) #xbar_c - xbar_t
+}
+```
+
+(iii) Try it out for the given data.
+
+```{r}
+mytest.1(mice) # this is my observed test statistic
+```
+
+(iv) Permute the labels and compute the test statistic after the permutation.
+
+```{r}
+mice.permute = mice #create a copy of the data
+mice.permute$pop = mice.permute$pop[sample(24,24,replace=F)] #one permutation of the 24 labels
+
+head(mice.permute)
+head(mice)
+mytest.1(mice.permute) #test statistic for the permuted set
+```
+
+
+(vi) We can do this with a single function
+
+```{r}
+
+#this function returns the test statistic value for the permutation test
+#here we are permuting the laels
+permute.sample.1 = function(){
+  mice.permute$pop = mice.permute$pop[sample(24,24,replace=F)]
+  return(mytest.1(mice.permute))
+}
+```
+
+(vii) Try it out
+
+```{r}
+permute.sample.1() #just one permiutation
+```
+
+(viii) Now do this a large number of times and look at the result.
+
+```{r}
+N = 1000
+test.1 = replicate(N,permute.sample.1())
+hist(test.1, main = "Null distribution", prob=T,col="cadetblue2")
+```
+
+(ix) The observed value was about 8.
+
+```{r}
+N = 10000
+test.1 = replicate(N,permute.sample.1())
+hist(test.1, main = "Null distribution", prob=T, col="cadetblue2")
+abline(v = mytest.1(mice), col = 2, lwd = 2)
+```
+
+(x) Estimate for p-value: Fraction of permutations where the test statistic is larger than the observed one.  
+
+```{r}
+mean(test.1 > mytest.1(mice))#p-value
+
+```
+
+(xi) What does this mean?
+
+the value we observed (test.1) is at the far end of the null distribution.
+
+The fraction of values from the null distribution is larger than the observed value is the p-value, which is low in this case. 
+
+Therefore We can reject the null hypothesis. So at 5\% significance level we have enough evidence to conclude that average time to complete the maze of treatment group mice and control group mice are different.
+
+
+(xii) Alternative: Make random subsets of the completion time
+
+```{r}
+permute.sample.2 = function(){
+  mysample = sample(24,10,replace = F)
+  return(mean(mice$time[mysample]) - mean(mice$time[-mysample]))#now we sample(permute) observed times, and we assume first 10 is "control" group and the second 14 values belongs to "treatment" group.
+}
+permute.sample.2()
+```
+
+This  runs a lot faster.
+
+```{r}
+N = 10000
+test.2 = replicate(N,permute.sample.2())
+hist(test.2, main = "Null distribution", , prob=T, 
+     sub = paste("p-value = ", round(mean(test.2 > mytest.1(mice)),4)), col="orange")
+abline(v = mytest.1(mice), col = 2, lwd = 2)
+```
+
+Still the p-vlaue is less than 0.05.
+
+### (b). Using the Median as test statistic!
+
+(i) Function to compute difference of medians for control and treatment groups
+
+```{r}
+median.diff = median(mice$time[mice$pop == "control"]) -
+  median(mice$time[mice$pop == "treatment"])
+```
+
+(ii) Make a single permutation (random subsets)
+
+```{r}
+permute.sample.3 = function(){
+  mysample = sample(24,10,replace = F)
+  return(median(mice$time[mysample]) - median(mice$time[-mysample]))
+}
+```
+
+(iii) Many random subsets, histogram, p-value
+
+```{r}
+N = 10000
+test.3 = replicate(N,permute.sample.3())
+hist(test.3, main = "Null distribution, difference of medians", sub = paste("p-value = ", round(mean(test.3 > median.diff),4)),prob=T)
+abline(v = median.diff, col = 2, lwd = 2)
+
+```
+
+The conclusion is the same, but the p-value is a little larger but still less than 0.05. 
+
+
+
+
+
+### Example 7. Permutation test for gss2002 data. 
+
+![](6.png)
+
+![](7.png)
+
+If the data is coming from the same distribution then the output won't change much. Because you are permuting from one same distribution.
+
+After repeating many times, now we have a sample of the test statistic- simulated distribution of the test statistic from the null distribution.  Is the observed value in the middle of that null distribution? or is it an extreme value?
+
+If it is somewhere in the middle, that means that what I'm observing is nothing special, that the null hypothesis is probably true. No evidence against it.
+
+But if it is an extreme value,at the tail, this cast doubt, so the null hypothesis is probably not true.
+
+
+
+(i) Make a single permutation
+
+```{r}
+
+tableGH= table(gss2002.clean2$Gender, gss2002.clean2$Happy)
+N <- sum(tableGH)
+
+gss.perm = gss2002.clean2 #make a new copy of the data
+gss.perm$Happy = gss.perm$Happy[sample(N,N)] #let's permute happiness levels,no replacement, shuffle everything around and make a new table.
+
+#now my happy labels are shuffled.
+
+table(gss.perm$Gender, gss.perm$Happy) #new table
+#compare
+tableGH #initial table
+```
+
+
+(ii) Compute Chi-square test statistic for the permuted table.
+
+```{r}
+
+myX2.2(table(gss.perm$Gender, gss.perm$Happy))#much lower than the observed value
+
+myX2.obs #this is our observed value
+#myX2.obs <- myX2.2(table(gss2002.clean$Gender, gss2002.clean$Happy))
+
+```
+
+(iii) Write a function for permutation.
+
+```{r}
+myperm = function(){
+  gss.perm <- gss2002.clean
+  N <- length(gss.perm[,1])
+  gss.perm$Happy <- gss.perm$Happy[sample(N,N)]
+  return(myX2.2(table(gss.perm$Gender, gss.perm$Happy))) #calculate the test statistic for each permutation.
+}
+```
+
+(iv) Repeat many times, make histogram, find p-value
+
+```{r}
+z <- replicate(10000, myperm()) #10000 permutations
+
+hist(z, breaks = 50, prob = T)
+abline(v = myX2.obs, col = 2)
+mean(z > myX2.obs) #p-value
+```
+
+the value we observed (myX2.obs) is now at the far end. So we can conclude that what we observe is highly unlikely.
+
+The fraction of values from the null distribution is larger than the observed value is the p-value, which is low in this case. 
+
+(v) Conclusion? 
+
+We can reject the null hypothesis at 5\% significance level. We have enough evidence to conclude that The happiness is not same for both genders.
+
+
+
+# Exam Problems
+
+## Problem 1: Hypothesis Testing and C.Is
+
+
+What is normal body temperature? The standard has been $98.6^0 F$. Suppose a medical worker suspects that body temperatures in children in Sodor are higher than the normal body temperature. She obtains measurements from a random sample of 18 children and finds the following:
+
+```{r}
+c(98.0, 98.9, 98.9, 98.9, 99.0, 98.4, 98.9, 99.0, 98.8, 99.2, 
+      98.6, 98.6, 99.1, 98.8, 98.9, 98.9, 98.5, 98.7)
+```
+
+a. What are the null and alternative hypotheses for this test?
+
+b. Carry out the test and state a conclusion in a complete sentence.
+
+c. What can you say about the confidence interval?
+
+d. Make a bootstrap confidence interval of the mean body temperature with the data from this problem and compare the result to your answer to part (c).
+
+
+### Solution
+
+a. Let $\theta$ be the mean body temperature of children in this town. 
+
+The null hypothesis is that this is the same as everywhere else, $H_0: \theta = 98.6$. The alternative is that the mean body temperature in this town is higher, $\theta > 98.6$.  
+
+b. Carry out a t-test:
+
+```{r}
+x = c(98.0, 98.9, 98.9, 98.9, 99.0, 98.4, 98.9, 99.0, 98.8, 99.2, 
+      98.6, 98.6, 99.1, 98.8, 98.9, 98.9, 98.5, 98.7)
+t.test(x, mu = 98.6, alternative = "greater")
+```
+
+The p-value is less than 0.01%. Therfore we can reject the null hypothesis at 5% significance level. There is strong evidence, to conclude that the mean body temperature of children in this town is higher than  98.6.  
+
+c. the 95% lower confidence bound is larger than 98.6. i.e we are 95% confident that the true mean body temperature is higher than 98.6.
+
+d. Here is 95% bootstrap confidence bound. 
+
+```{r}
+ boot.129 <- replicate(10000, mean(sample(x,length(x), replace = T)))
+quantile(boot.129, 0.05)
+```
+
+It is simillar to what we have obtained from the t-test.
+
+
+## Problem 2: Chi-square test.
+
+Import the GS2002 data set. Use a $\chi^2$  test of independence to determine if marital status and education are independent. 
+
+a. State your null and alternative hypothesis. 
+
+$H_0:$ The marital status and education levels are independent.
+
+$H_a:$ The marital status and education levels are not independent
+
+b. Are these attributes independent? Why/why not? 
+
+c. There was no warning message when the test was done. Why not?
+
+d. Identify two cells that contributed very little (< 1) to the chi-squared statistic and two other cells that contributed a lot (> 5).
+
+e. For example, There are more single people (Never married) who got a  "High School degree" than expected. Can you think of a reason?
+
+
+```{r}
+gss <- read.csv("GSS2002.csv")
+head(gss)
+
+(A <- table(gss$Education, gss$Marital))
+
+r <- rowSums(A)
+c <- colSums(A)
+N = sum(A)
+(expected <- round(outer(r,c)/N,2))
+
+
+chisq.test(A)
+
+```
+
+b. The p-value is very small, hence there is very strong evidence that the attributes are not independent. 
+
+c. There was no warning since all expected counts are > 5 and that is the only possible reason for a warning here. 
+
+```{r}
+test<-chisq.test(A)
+test$expected
+```
+
+### Yate's continuity correction
+
+Some of the expected counts are less than 10. Therefore, you may be able to use the Yate's continuity correction;
+
+```{r}
+chisq.test(A, correct = TRUE)
+```
+
+There is no apparent difference between the initial results and the corrected results. Most of the researchers use this correction when you have an at least one expected cell count less than 5.
+
+d. The cells for “divorced and High School” and for “never married and High School” contribute a lot, meanwhile , the cells for “Separated and Junior college” and “Separated and Graduate” contribute very little (expected and observed are close). 
+
+
+
+
