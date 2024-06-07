@@ -4,4 +4,4 @@
 [![Website Badge](https://img.shields.io/badge/-ModeEdna-606C38?style=flat&logo=Google-Chrome&logoColor=white)](https://modeedna.netlify.app)
 [![Gmail Badge](https://img.shields.io/badge/-ea795-E63946?style=flat&logo=Gmail&logoColor=white)](mailto:ea795@georgetown.edu)
 
-Welcome to my profile! I'm a recent-grad with and MSc in Data Science and Analytics, a background in business, and 4 years of professional experience. Feel free to connect!
+Welcome to my profile! I'm a recent-grad with an MSc in Data Science and Analytics, a background in business, and 4 years of professional experience. Feel free to connect!
